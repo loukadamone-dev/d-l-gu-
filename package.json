@@ -1,0 +1,9 @@
+{
+  "name": "la-delegation-2026",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site de candidature Louka & Aron — boîte à idées et suivi en ligne",
+  "main": "server.js",
+  "scripts": {"start":"node server.js"},
+  "dependencies": {"express":"^4.21.2","nodemailer":"^6.9.16"}
+}
