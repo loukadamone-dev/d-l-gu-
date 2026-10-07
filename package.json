@@ -1,9 +1,15 @@
 {
   "name": "la-delegation-2026",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Site de candidature Louka & Aron — boîte à idées et suivi en ligne",
+  "description": "Site Louka & Aron — PostgreSQL, boîte à idées et espace privé de délégation",
   "main": "server.js",
-  "scripts": {"start":"node server.js"},
-  "dependencies": {"express":"^4.21.2","nodemailer":"^6.9.16"}
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "nodemailer": "^6.9.16",
+    "pg": "^8.16.3"
+  }
 }

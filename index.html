@@ -228,6 +228,46 @@
   <div class="info-banner"><strong>Confidentialité</strong><span>Le tableau public ne montre pas les textes des demandes. Pour préserver la confidentialité, le suivi détaillé se fait avec une référence unique.</span></div>
 </section>
 
+
+<section class="page" data-route="admin">
+  <div class="page-head">
+    <span class="eyebrow">ESPACE PRIVÉ · L&A</span>
+    <h2>Le tableau de bord<br><em>des délégués.</em></h2>
+    <p>Cet espace est réservé à Louka et Aron. Les élèves ne voient jamais les contenus enregistrés ici.</p>
+  </div>
+
+  <div id="adminLogin" class="admin-login">
+    <div>
+      <span class="admin-kicker">ACCÈS SÉCURISÉ</span>
+      <h3>Connexion à l'espace délégués.</h3>
+      <p>Entre le code privé configuré sur Render. Ce code n'est jamais affiché dans le site public.</p>
+    </div>
+    <form id="adminLoginForm">
+      <input id="adminToken" type="password" placeholder="Code administrateur" autocomplete="current-password" required>
+      <button class="btn primary" type="submit">Se connecter ↗</button>
+      <div id="adminLoginResult" class="form-result" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <div id="adminPanel" class="admin-panel" hidden>
+    <div class="admin-toolbar">
+      <div><span>CONSOLE L&A</span><h3>Les demandes reçues.</h3></div>
+      <div class="admin-toolbar-actions"><button id="adminRefresh" class="admin-btn">↻ Actualiser</button><button id="adminLogout" class="admin-btn danger">Déconnexion</button></div>
+    </div>
+    <div id="adminStats" class="admin-stats"></div>
+    <div class="admin-columns">
+      <div>
+        <div class="admin-section-head"><span>BOÎTE À IDÉES</span><b id="adminIdeaCount"></b></div>
+        <div id="adminIdeas" class="admin-items"></div>
+      </div>
+      <div>
+        <div class="admin-section-head"><span>MESSAGES</span><b id="adminMessageCount"></b></div>
+        <div id="adminMessages" class="admin-items"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="page" data-route="faq">
   <div class="page-head"><span class="eyebrow">08 · FAQ</span><h2>Les questions<br><em>qu'on peut se poser.</em></h2><p>Parce qu'une bonne candidature doit aussi être claire sur ses limites.</p></div>
   <div class="faq">
@@ -277,7 +317,7 @@
   </div>
 
   <div class="message-center">
-    <div class="message-head"><span>ESPACE MESSAGE</span><h3>Besoin de nous écrire ?</h3><p>Deux possibilités : rester anonyme ou laisser un moyen de réponse. Les messages sont transmis à Louka et Aron lorsque le service mail est configuré.</p></div>
+    <div class="message-head"><span>ESPACE MESSAGE</span><h3>Besoin de nous écrire ?</h3><p>Deux possibilités : rester anonyme ou laisser un moyen de réponse. Les messages sont enregistrés dans l’espace privé de la délégation. Un e-mail peut être ajouté plus tard, mais il n’est pas nécessaire au fonctionnement.</p></div>
     <div class="message-grid">
       <form class="message-card" id="anonymousForm">
         <span>01 · ANONYME</span><h4>Écrire sans donner ton nom</h4>
@@ -304,7 +344,7 @@
 </section>
 </main>
 
-<footer><div><strong>L&A</strong> · DÉLÉGATION 2026</div><span>Louka Damone × Aron Willaert</span><a href="https://www.ar-peruwelz.be/" target="_blank" rel="noopener">Athénée Royal de Péruwelz ↗</a></footer>
+<footer><div><strong>L&A</strong> · DÉLÉGATION 2026</div><span>Louka Damone × Aron Willaert</span><a href="#admin" data-page="admin" class="admin-footer-link">Espace délégués</a><a href="https://www.ar-peruwelz.be/" target="_blank" rel="noopener">Athénée Royal de Péruwelz ↗</a></footer>
 <script src="script.js"></script>
 </body>
 </html>

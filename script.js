@@ -23,3 +23,97 @@ function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':
 
 async function bindMessageForm(form,anonymous){form?.addEventListener('submit',async e=>{e.preventDefault();const btn=form.querySelector('button'),result=form.querySelector('.form-result');const data=Object.fromEntries(new FormData(form).entries());data.anonymous=anonymous;btn.disabled=true;setResult(result,'Envoi en cours…');try{await api('/contact',{method:'POST',body:JSON.stringify(data)});setResult(result,'Message reçu ✓','success');form.reset()}catch(err){setResult(result,err.message,'error')}finally{btn.disabled=false}})}
 bindMessageForm(document.getElementById('anonymousForm'),true);bindMessageForm(document.getElementById('identifiedForm'),false);
+
+
+/* ===== ESPACE PRIVÉ DES DÉLÉGUÉS ===== */
+const adminLogin=document.getElementById('adminLogin'),adminPanel=document.getElementById('adminPanel');
+const adminLoginForm=document.getElementById('adminLoginForm'),adminToken=document.getElementById('adminToken');
+const adminLoginResult=document.getElementById('adminLoginResult');
+async function adminApi(path,options={}){
+  const r=await fetch(API+path,{credentials:'same-origin',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||'Erreur administrateur.');
+  return d;
+}
+function adminEscape(v){return escapeHtml(v??'')}
+function adminDate(v){try{return new Date(v).toLocaleString('fr-BE',{dateStyle:'short',timeStyle:'short'})}catch{return ''}}
+function statusOptions(current){
+  return ['NOUVELLE','EN ÉTUDE','TRANSMISE','RÉPONSE OBTENUE'].map(s=>`<option ${s===current?'selected':''}>${s}</option>`).join('');
+}
+function renderAdmin(data){
+  const s=data.stats||{};
+  const stats=[
+    ['TOTAL IDÉES',s.totalIdeas||0],['NOUVELLES',s.newIdeas||0],
+    ['EN ÉTUDE',s.inStudy||0],['TRANSMISES',s.transmitted||0],['RÉPONSES',s.answered||0]
+  ];
+  document.getElementById('adminStats').innerHTML=stats.map(x=>`<div class="admin-stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+  document.getElementById('adminIdeaCount').textContent=`${data.ideas.length} idée(s)`;
+  document.getElementById('adminMessageCount').textContent=`${data.contacts.length} message(s)`;
+
+  const ideas=document.getElementById('adminIdeas');
+  ideas.innerHTML=data.ideas.length?data.ideas.map(i=>`
+    <article class="admin-item">
+      <div class="admin-item-head"><span class="admin-item-id">${adminEscape(i.id)}</span><span class="admin-item-date">${adminDate(i.createdAt)}</span></div>
+      <div class="admin-meta"><span>${adminEscape(i.category)}</span><span>${adminEscape(i.status)}</span></div>
+      <p>${adminEscape(i.text)}</p>
+      <div class="admin-controls">
+        <select data-status="${adminEscape(i.id)}">${statusOptions(i.status)}</select>
+        <textarea data-response="${adminEscape(i.id)}" placeholder="Réponse / note interne…">${adminEscape(i.response||'')}</textarea>
+        <div class="admin-control-row">
+          <button onclick="adminUpdateIdea('${adminEscape(i.id)}')">Enregistrer</button>
+          <button class="delete" onclick="adminDeleteIdea('${adminEscape(i.id)}')">Supprimer</button>
+        </div>
+      </div>
+    </article>`).join(''):'<div class="admin-empty">Aucune idée reçue pour le moment.</div>';
+
+  const messages=document.getElementById('adminMessages');
+  messages.innerHTML=data.contacts.length?data.contacts.map(m=>`
+    <article class="admin-item">
+      <div class="admin-item-head"><span class="admin-item-id">${m.anonymous?'ANONYME':'IDENTIFIÉ'}</span><span class="admin-item-date">${adminDate(m.createdAt)}</span></div>
+      <div class="admin-meta"><span>${adminEscape(m.category||'Sans catégorie')}</span>${m.email?`<span>${adminEscape(m.email)}</span>`:''}</div>
+      <h4>${adminEscape(m.subject||'Message sans objet')}</h4>
+      <p>${adminEscape(m.message)}</p>
+      ${m.name?`<small>${adminEscape(m.name)}</small>`:''}
+    </article>`).join(''):'<div class="admin-empty">Aucun message reçu pour le moment.</div>';
+}
+async function adminLoad(){
+  try{
+    const d=await adminApi('/admin/data');
+    adminLogin.hidden=true; adminPanel.hidden=false; renderAdmin(d);
+  }catch{
+    adminLogin.hidden=false; adminPanel.hidden=true;
+  }
+}
+adminLoginForm?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const token=adminToken.value.trim();
+  if(!token)return;
+  setResult(adminLoginResult,'Connexion…');
+  try{
+    await adminApi('/admin/login',{method:'POST',body:JSON.stringify({token})});
+    adminToken.value='';
+    setResult(adminLoginResult,'Connexion réussie ✓','success');
+    await adminLoad();
+  }catch(err){setResult(adminLoginResult,err.message,'error')}
+});
+document.getElementById('adminRefresh')?.addEventListener('click',adminLoad);
+document.getElementById('adminLogout')?.addEventListener('click',async()=>{
+  await adminApi('/admin/logout',{method:'POST'}).catch(()=>{});
+  adminPanel.hidden=true; adminLogin.hidden=false;
+});
+window.adminUpdateIdea=async function(id){
+  const status=document.querySelector(`[data-status="${CSS.escape(id)}"]`)?.value;
+  const response=document.querySelector(`[data-response="${CSS.escape(id)}"]`)?.value||'';
+  try{await adminApi('/admin/ideas/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({status,response})});await adminLoad()}
+  catch(e){alert(e.message)}
+};
+window.adminDeleteIdea=async function(id){
+  if(!confirm('Supprimer définitivement cette idée ?'))return;
+  try{await adminApi('/admin/ideas/'+encodeURIComponent(id),{method:'DELETE'});await adminLoad()}
+  catch(e){alert(e.message)}
+};
+const originalShowPage=showPage;
+showPage=function(r,push=true){
+  originalShowPage(r,push);
+  if(r==='admin') adminLoad();
+};
